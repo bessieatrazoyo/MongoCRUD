@@ -8,17 +8,46 @@ module.exports = function(app) {
 
   app.param('userId', users.userByID);
 
-  app.route('./register')
+  app.route('/register')
     .get(users.renderRegister)
     .post(users.register);
 
-  app.route('./login')
+  app.route('/login')
     .get(users.renderLogin)
     .post(passport.authenticate('local', {
       successRedirect: '/',
       failureRedirect: '/login',
       failureFlash: true
     }));
+
+  app.get('/oauth/facebook', passport.authenticate('facebook', {
+    failureRedirect: '/login',
+    scope: ['email']
+  }));
+
+  app.get('/oauth/facebook/callback', passport.authenticate('facebook', {
+    failureRedirect: '/login',
+    successRedirect: '/',
+    scope:['email']
+  }));
+
+  app.get('/oauth/twitter', passport.authenticate('twitter', {
+    failureRedirect: '/login',
+  }));
+
+  app.get('/oauth/twitter/callback', passport.authenticate('twitter', {
+    failureRedirect: '/login',
+    successRedirect: '/'
+  }));
+
+  app.get('/oauth/google', passport.authenticate('google', {
+    failureRedirect: '/login',
+  }));
+
+  app.get('/oauth/google/callback', passport.authenticate('google', {
+    failureRedirect: '/login',
+    successRedirect: '/'
+  }));
 
   app.get('/logout', users.logout);
 };

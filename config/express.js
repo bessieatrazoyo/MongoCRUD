@@ -2,6 +2,8 @@ var config = require('./config');
 var express = require('express');
 var bodyParser = require('body-parser');
 var passport = require('passport');
+var flash = require('connect-flash');
+var session = require('express-session');
 
 module.exports = function() {
     var app = express();
@@ -13,6 +15,12 @@ module.exports = function() {
     app.use(bodyParser.json());
     app.use(passport.initialize());
     app.use(passport.session());
+    app.use(flash());
+    app.use(session({
+      saveUninitialized: true,
+      resave: true,
+      secret: 'OurSuperSecretCookieSecret'
+    }));
 
     app.set('views', './app/views');
 	  app.set('view engine', 'ejs');

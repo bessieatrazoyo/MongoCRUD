@@ -36,8 +36,6 @@ exports.renderLogin = function(req, res, next) {
 };
 
 exports.renderRegister = function(req, res, next) {
-  console.log('renderRegister');
-  console.log(req);
   if (!req.user) {
     res.render('register', {
       title: 'Register Form',
@@ -92,6 +90,40 @@ exports.create = function(req, res, next) {
     });
 };
 
+exports.saveOAuthUserProfile = function(req, profile, done) {
+  User.findOne({
+    provider: profile.provider,
+    providerId: profile.providerId
+  },
+  function(err, user) {
+    if (err) {
+      return done(err);
+    }
+    else {
+      if (!user) {
+        var possibleUsername = profile.username || ((profile.email) ? profile.email.split('@')[0] : '');
+        User.findUniqueUsername(possibleUsername, null, function(availableUsername) {
+          profile.username = availableUsername;
+          user = new User(profile);
+
+          user.save(function(err) {
+            if (err) {
+              var message = _this.getErrorMessage(err);
+              req.flash('error', message);
+              return res.redirect('/signup');
+            }
+
+            return done(err, user);
+          });
+        });
+      }
+      else {
+        return done(err, user);
+      }
+    }
+  });
+};
+  
 exports.list = function(req, res, next) {
     User.find({}, function(err, users) {
         if (err) {
